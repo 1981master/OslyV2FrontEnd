@@ -6,9 +6,6 @@ const API_URL = 'http://localhost:8082/api/auth' // Replace with your actual bac
 // Login API function
 export const login = async (credentials) => {
   try {
-    // Sending POST request to the backend with username and password
-    console.log('Login ...:')
-
     const response = await axios.post(
       `http://localhost:8082/api/auth/login`,
       credentials,

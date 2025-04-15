@@ -9,7 +9,7 @@ const LoginForm = () => {
   const onFinish = async (values) => {
     try {
       const response = await login(values) // Call the login API
-      console.log('Login success:', response.data)
+      // console.log('Login success:', response.data)
 
       // Assuming the response contains the JWT token
       const token = response.data.token

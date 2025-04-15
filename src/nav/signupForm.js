@@ -1,12 +1,35 @@
 import { LockOutlined, MailOutlined, UserOutlined } from '@ant-design/icons'
-import { Button, Form, Input, Typography } from 'antd'
+import { Button, Form, Input, Typography, message } from 'antd'
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
+import { signup } from './signup'; // Adjust the import path as needed
+
 
 const { Title, Text } = Typography
 
 const SignUpForm = () => {
-  const onFinish = (values) => {
-    console.log('Received values of form: ', values)
+    const navigate = useNavigate()
+
+  const onFinish = async (values) => {
+    const { username, email, password } = values
+
+    const userData = {
+      username,
+      email,
+      password,
+    }
+
+    try {
+      const response = await signup(userData)
+      console.log('Signup success:', response.data)
+      message.success('Account created successfully!')
+      // You can navigate to login page here:
+      navigate('/login') // Redirect to login page
+      // navigate('/login')
+    } catch (err) {
+      console.error('Signup error:', err)
+      message.error('Signup failed. Please try again.')
+    }
   }
 
   return (
