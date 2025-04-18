@@ -1,11 +1,14 @@
 import { LockOutlined, UserOutlined } from '@ant-design/icons'
 import { Button, Checkbox, Form, Input, Typography } from 'antd'
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
 import { login } from './login' // Import the login function
 
 const { Title, Text } = Typography
 
 const LoginForm = () => {
+  const navigate = useNavigate()
+
   const onFinish = async (values) => {
     try {
       const response = await login(values) // Call the login API
@@ -18,7 +21,7 @@ const LoginForm = () => {
       localStorage.setItem('authToken', token)
 
       // Redirect to a protected page (e.g., dashboard)
-      window.location.href = '/dashboard' // You can modify this URL based on your route structure
+      navigate('/dashboard')
     } catch (error) {
       console.error('Login failed:', error.response?.data || error.message)
       // Show error message to the user (optional)

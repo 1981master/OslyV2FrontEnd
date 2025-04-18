@@ -1,34 +1,54 @@
 import { LockOutlined, MailOutlined, UserOutlined } from '@ant-design/icons'
 import { Button, Form, Input, Typography, message } from 'antd'
-import React from 'react'
+import axios from 'axios'
+import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { signup } from './signup'; // Adjust the import path as needed
-
+import { emailVerification } from './emailVerification' // Adjust the path
+import PopupModal from './popupModal' // Adjust path if needed
+import { signup } from './signup' // Adjust path as needed
 
 const { Title, Text } = Typography
 
 const SignUpForm = () => {
-    const navigate = useNavigate()
+  const navigate = useNavigate()
+  const [showPopup, setShowPopup] = useState(false)
+  const [pendingUser, setPendingUser] = useState(null)
 
   const onFinish = async (values) => {
     const { username, email, password } = values
-
-    const userData = {
-      username,
-      email,
-      password,
-    }
+    const userData = { username, email, password }
 
     try {
       const response = await signup(userData)
       console.log('Signup success:', response.data)
       message.success('Account created successfully!')
-      // You can navigate to login page here:
-      navigate('/login') // Redirect to login page
-      // navigate('/login')
+
+      // Trigger email verification
+      await emailVerification({ email }) // Call the backend to send the verification code to the email
+
+      // Show verification modal
+      setPendingUser(email)
+      setShowPopup(true)
     } catch (err) {
       console.error('Signup error:', err)
       message.error('Signup failed. Please try again.')
+    }
+  }
+
+  const handleCodeSubmit = async (code) => {
+    try {
+      const response = await axios.post(
+        'http://localhost:8082/api/auth/verify-code',
+        {
+          email: pendingUser, // This is the email saved in the state
+          code,
+        },
+      )
+      message.success('Verification successful!')
+      setShowPopup(false)
+      navigate('/login') // Redirect to login after successful verification
+    } catch (err) {
+      message.error(err.response.data || 'Invalid or expired code')
     }
   }
 
@@ -176,6 +196,17 @@ const SignUpForm = () => {
           © {new Date().getFullYear()} Osly. All rights reserved.
         </Text>
       </div>
+
+      {/* Verification Modal */}
+      <PopupModal
+        visible={showPopup}
+        onClose={() => setShowPopup(false)}
+        title="Enter Verification Code"
+        content={`We have sent a verification code to ${
+          pendingUser || 'your email'
+        }.`}
+        onCodeSubmit={handleCodeSubmit}
+      />
     </div>
   )
 }
