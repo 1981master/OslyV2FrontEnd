@@ -1,7 +1,8 @@
 import { Layout, Typography } from 'antd'
 import React from 'react'
+import ProductDashboard from './ProductCard'
 
-const { Title, Text } = Typography
+const { Title } = Typography
 const { Header, Content, Footer } = Layout
 
 const Dashboard = () => {
@@ -15,11 +16,18 @@ const Dashboard = () => {
           Osly Dashboard
         </Title>
       </Header>
-      <Content style={{ padding: 24 }}>
-        <Title level={4}>Welcome to the Dashboard</Title>
-        <Text>This is a protected page after login/signup.</Text>
+
+      <Content style={{ padding: '24px' }}>
+        <ProductDashboard />
       </Content>
-      <Footer style={{ textAlign: 'center' }}>
+
+      <Footer
+        style={{
+          textAlign: 'center',
+          backgroundColor: '#576feb',
+          color: '#fff',
+        }}
+      >
         © {new Date().getFullYear()} Osly. All rights reserved.
       </Footer>
     </Layout>
