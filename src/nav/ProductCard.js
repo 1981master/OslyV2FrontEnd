@@ -11,18 +11,17 @@ import {
   message,
 } from 'antd'
 import React, { useEffect, useState } from 'react'
+import { emailVerification } from './emailVerification'
 
 const { Meta } = Card
 
-const ProductCard = ({ product, onUpdatePrice }) => {
-  console.log('Product Image:', product.image) // Log the product image to check the value
-
+const ProductCard = ({ product, onUpdatePrice, onVerifyEmail }) => {
   return (
     <Card
       hoverable
       cover={
         <img
-          src={`data:image/png;base64,${product.image || ''}`} // Use the base64 image if available
+          src={product.imageUrl || ''}
           alt={product.name || 'Product'}
           style={{
             width: '100%',
@@ -38,6 +37,7 @@ const ProductCard = ({ product, onUpdatePrice }) => {
         >
           Edit Price
         </Button>,
+        <Button onClick={() => onVerifyEmail(product)}>Verify Email</Button>,
       ]}
     >
       <Meta
@@ -67,9 +67,11 @@ const ProductDashboard = () => {
     category: '',
     image: '',
   })
+  const [isVerificationModalVisible, setVerificationModalVisible] =
+    useState(false)
+  const [selectedProduct, setSelectedProduct] = useState(null)
 
   useEffect(() => {
-    // Fetch existing products (optional)
     fetch('http://localhost:8080/api/products')
       .then((res) => res.json())
       .then((data) => setProducts(data))
@@ -167,13 +169,11 @@ const ProductDashboard = () => {
     const img = new Image()
 
     img.onload = () => {
-      // Resize the image (half the size)
       canvas.width = img.width / 4
       canvas.height = img.height / 4
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
       const resizedBase64 = canvas.toDataURL('image/png')
 
-      // Set the resized image
       setNewProduct((prev) => ({
         ...prev,
         image: resizedBase64,
@@ -181,12 +181,34 @@ const ProductDashboard = () => {
     }
 
     img.src = URL.createObjectURL(file)
-    return false // Prevent default upload action
+    return false
   }
 
   const handleImageChange = (file) => {
-    // Use resizeImage function to handle image resizing
     return resizeImage(file)
+  }
+
+  const handleEmailVerification = async (product) => {
+    try {
+      setSelectedProduct(product)
+      setVerificationModalVisible(true)
+
+      const response = await emailVerification({ productId: product.id })
+
+      if (response.status === 200) {
+        message.success('Verification email sent!')
+      } else {
+        message.error('Failed to send verification email')
+      }
+    } catch (err) {
+      console.error(err)
+      message.error('Error sending verification email')
+    }
+  }
+
+  const handleCodeSubmit = (code) => {
+    message.success(`Code ${code} submitted for ${selectedProduct?.name}`)
+    setVerificationModalVisible(false)
   }
 
   return (
@@ -216,6 +238,7 @@ const ProductDashboard = () => {
                     prev.map((p) => (p.id === id ? { ...p, price } : p)),
                   )
                 }
+                onVerifyEmail={handleEmailVerification}
               />
             </Col>
           ))}
@@ -353,6 +376,14 @@ const ProductDashboard = () => {
           </Form.Item>
         </Form>
       </Modal>
+
+      <popupModal
+        visible={isVerificationModalVisible}
+        onClose={() => setVerificationModalVisible(false)}
+        title="Enter Verification Code"
+        content={`Please enter the code sent for ${selectedProduct?.name}`}
+        onCodeSubmit={handleCodeSubmit}
+      />
     </>
   )
 }

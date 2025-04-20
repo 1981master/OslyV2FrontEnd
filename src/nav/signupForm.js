@@ -38,7 +38,7 @@ const SignUpForm = () => {
   const handleCodeSubmit = async (code) => {
     try {
       const response = await axios.post(
-        'http://localhost:8082/api/auth/verify-code',
+        'http://localhost:8080/api/auth/verify-code',
         {
           email: pendingUser, // This is the email saved in the state
           code,
