@@ -1,13 +1,22 @@
 import { Input, Modal } from 'antd'
-import React, { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 const PopupModal = ({ visible, onClose, title, content, onCodeSubmit }) => {
   const [code, setCode] = useState('')
 
+  // Reset code whenever modal is opened or closed
+  useEffect(() => {
+    if (!visible) setCode('')
+  }, [visible])
+
   const handleOk = () => {
-    if (code.trim() === '') return
-    onCodeSubmit(code)
-    setCode('')
+    if (onCodeSubmit) {
+      if (code.trim() === '') return
+      onCodeSubmit(code)
+      setCode('')
+    } else {
+      onClose()
+    }
   }
 
   const handleCancel = () => {
@@ -21,14 +30,18 @@ const PopupModal = ({ visible, onClose, title, content, onCodeSubmit }) => {
       title={title}
       onOk={handleOk}
       onCancel={handleCancel}
-      okText="Verify"
+      okText={onCodeSubmit ? 'Verify' : 'OK'}
     >
       <p>{content}</p>
-      <Input
-        placeholder="Enter verification code"
-        value={code}
-        onChange={(e) => setCode(e.target.value)}
-      />
+
+      {onCodeSubmit && (
+        <Input
+          placeholder="Enter verification code"
+          value={code}
+          onChange={(e) => setCode(e.target.value)}
+          style={{ marginTop: 16 }}
+        />
+      )}
     </Modal>
   )
 }
