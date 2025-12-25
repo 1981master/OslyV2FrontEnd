@@ -1,31 +1,34 @@
-import React from 'react'
-import { Route, Routes } from 'react-router-dom' // Import Routes and Route
-import Dashboard from './nav/Dashboard'
-import LoginForm from './nav/loginForm' // Your LoginForm component
-import SignUpForm from './nav/signupForm' // Your SignUpForm component
+import { Route, Routes } from 'react-router-dom'
+import Dashboard from './nav/components/Dashboard'
+import LoginForm from './nav/components/LoginForm'
+import ProtectedRoute from './nav/components/ProtectedRoute'
+import SignUpForm from './nav/components/SignupForm'
 
 const App = () => {
-  return (
-    <Routes>
-      <Route
-        path="/signup"
-        element={<SignUpForm />}
-      />
-      <Route
-        path="/login"
-        element={<LoginForm />}
-      />
-      <Route
-        path="/dashboard"
-        element={<Dashboard />}
-      />
-      <Route
-        path="/"
-        element={<LoginForm />}
-      />
-      {/* Default route */}
-    </Routes>
-  )
+    return (
+        <Routes>
+            <Route
+                path="/signup"
+                element={<SignUpForm />}
+            />
+            <Route
+                path="/login"
+                element={<LoginForm />}
+            />
+            <Route
+                path="/dashboard"
+                element={
+                    <ProtectedRoute>
+                        <Dashboard />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/"
+                element={<LoginForm />}
+            />
+        </Routes>
+    )
 }
 
 export default App
