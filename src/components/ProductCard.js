@@ -1,18 +1,16 @@
 import {
     Button,
     Card,
-    Col,
     Form,
     Input,
     InputNumber,
     Modal,
-    Row,
     Upload,
     message,
 } from 'antd'
 import { useEffect, useState } from 'react'
 import { EmailVerification } from './EmailVerification'
-import PopupModal from './PopupModal' // Fixed import
+import PopupModal from './PopupModal'
 
 const { Meta } = Card
 
@@ -22,11 +20,11 @@ const ProductCard = ({ product, onUpdatePrice, onVerifyEmail }) => {
             hoverable
             cover={
                 <img
-                    src={product.imageUrl || ''}
+                    src={product.imageUrl || product.image || ''}
                     alt={product.name || 'Product'}
                     style={{
                         width: '100%',
-                        height: 'auto',
+                        height: '200px',
                         objectFit: 'cover',
                     }}
                 />
@@ -64,9 +62,7 @@ const ProductDashboard = () => {
         boughtPrice: '',
         sellPrice: '',
         quantity: '',
-        storeId: null,
         store: '',
-        categoryId: null,
         category: '',
         image: '',
     })
@@ -144,7 +140,7 @@ const ProductDashboard = () => {
             const savedProduct = await response.json()
             setProducts((prev) => [...prev, savedProduct])
             message.success('Product added successfully')
-
+            form.resetFields()
             setNewProduct({
                 name: '',
                 barcode: '',
@@ -152,13 +148,10 @@ const ProductDashboard = () => {
                 boughtPrice: '',
                 sellPrice: '',
                 quantity: '',
-                storeId: null,
                 store: '',
-                categoryId: null,
                 category: '',
                 image: '',
             })
-            form.resetFields()
             setIsAddModalVisible(false)
         } catch (err) {
             console.error('Error:', err)
@@ -193,9 +186,7 @@ const ProductDashboard = () => {
         try {
             setSelectedProduct(product)
             setVerificationModalVisible(true)
-
-            const response = await EmailVerification({ productId: product.id }) // fixed
-
+            const response = await EmailVerification({ productId: product.id })
             if (response.status === 200) {
                 message.success('Verification email sent!')
             } else {
@@ -222,30 +213,30 @@ const ProductDashboard = () => {
                 + Add New Product
             </Button>
 
-            <Row gutter={[16, 16]}>
-                {products &&
-                    products.map((product) => (
-                        <Col
-                            key={product.id}
-                            xs={24}
-                            sm={12}
-                            md={8}
-                            lg={6}
-                        >
-                            <ProductCard
-                                product={product}
-                                onUpdatePrice={(id, price) =>
-                                    setProducts((prev) =>
-                                        prev.map((p) =>
-                                            p.id === id ? { ...p, price } : p,
-                                        ),
-                                    )
-                                }
-                                onVerifyEmail={handleEmailVerification}
-                            />
-                        </Col>
-                    ))}
-            </Row>
+            {/* CSS Grid container */}
+            <div
+                style={{
+                    display: 'grid',
+                    gridTemplateColumns:
+                        'repeat(auto-fill, minmax(250px, 1fr))',
+                    gap: '16px',
+                }}
+            >
+                {products.map((product) => (
+                    <ProductCard
+                        key={product.id}
+                        product={product}
+                        onUpdatePrice={(id, price) =>
+                            setProducts((prev) =>
+                                prev.map((p) =>
+                                    p.id === id ? { ...p, price } : p,
+                                ),
+                            )
+                        }
+                        onVerifyEmail={handleEmailVerification}
+                    />
+                ))}
+            </div>
 
             <Modal
                 title="Add New Product"
@@ -260,9 +251,7 @@ const ProductDashboard = () => {
                     <Form.Item
                         name="name"
                         label="Product Name"
-                        rules={[
-                            { required: true, message: 'Enter product name' },
-                        ]}
+                        rules={[{ required: true }]}
                     >
                         <Input
                             value={newProduct.name}
@@ -274,11 +263,10 @@ const ProductDashboard = () => {
                             }
                         />
                     </Form.Item>
-
                     <Form.Item
                         name="barcode"
                         label="Barcode"
-                        rules={[{ required: true, message: 'Enter barcode' }]}
+                        rules={[{ required: true }]}
                     >
                         <Input
                             value={newProduct.barcode}
@@ -290,7 +278,6 @@ const ProductDashboard = () => {
                             }
                         />
                     </Form.Item>
-
                     <Form.Item
                         name="image"
                         label="Upload Image"
@@ -303,7 +290,6 @@ const ProductDashboard = () => {
                             <Button>Select Image</Button>
                         </Upload>
                     </Form.Item>
-
                     <Form.Item
                         name="description"
                         label="Description"
@@ -318,7 +304,6 @@ const ProductDashboard = () => {
                             }
                         />
                     </Form.Item>
-
                     <Form.Item
                         name="boughtPrice"
                         label="Bought Price"
@@ -336,7 +321,6 @@ const ProductDashboard = () => {
                             }
                         />
                     </Form.Item>
-
                     <Form.Item
                         name="sellPrice"
                         label="Sell Price"
@@ -351,7 +335,6 @@ const ProductDashboard = () => {
                             }
                         />
                     </Form.Item>
-
                     <Form.Item
                         name="quantity"
                         label="Quantity"
@@ -365,7 +348,6 @@ const ProductDashboard = () => {
                             }
                         />
                     </Form.Item>
-
                     <Form.Item
                         name="store"
                         label="Store Name"
@@ -378,10 +360,8 @@ const ProductDashboard = () => {
                                     store: e.target.value,
                                 })
                             }
-                            placeholder="Enter store name"
                         />
                     </Form.Item>
-
                     <Form.Item
                         name="category"
                         label="Category Name"
@@ -394,13 +374,11 @@ const ProductDashboard = () => {
                                     category: e.target.value,
                                 })
                             }
-                            placeholder="Enter category name"
                         />
                     </Form.Item>
                 </Form>
             </Modal>
 
-            {/* Use capitalized PopupModal */}
             <PopupModal
                 visible={isVerificationModalVisible}
                 onClose={() => setVerificationModalVisible(false)}

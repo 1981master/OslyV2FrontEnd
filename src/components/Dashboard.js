@@ -30,7 +30,7 @@ const Dashboard = () => {
                 {loading ? (
                     <Spin size="large" />
                 ) : (
-                    <Row gutter={[16, 16]}>
+                    <Row gutter={[8, 8]}>
                         {data.map((product) => (
                             <Col
                                 key={product.id}

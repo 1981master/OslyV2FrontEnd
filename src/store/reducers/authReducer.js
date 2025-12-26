@@ -7,15 +7,9 @@ import {
     SIGNUP_REQUEST,
     SIGNUP_SUCCESS,
 } from '../actions/types'
+import { authState } from '../states/authState'
 
-const initialState = {
-    user: null,
-    token: null,
-    loading: false,
-    error: null,
-}
-
-export const authReducer = (state = initialState, action) => {
+export const authReducer = (state = authState, action) => {
     switch (action.type) {
         // SIGNUP
         case SIGNUP_REQUEST:
@@ -47,7 +41,7 @@ export const authReducer = (state = initialState, action) => {
 
         // LOGOUT
         case LOGOUT:
-            return { ...initialState }
+            return { ...authState }
 
         default:
             return state
