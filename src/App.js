@@ -1,9 +1,8 @@
 import { Route, Routes } from 'react-router-dom'
-import Dashboard from './nav/components/Dashboard'
-import LoginForm from './nav/components/LoginForm'
-import ProtectedRoute from './nav/components/ProtectedRoute'
-import SignUpForm from './nav/components/SignupForm'
-
+import Dashboard from './components/Dashboard'
+import LoginForm from './components/LoginForm'
+import ProtectedRoute from './components/ProtectedRoute'
+import SignUpForm from './components/SignupForm'
 const App = () => {
     return (
         <Routes>
