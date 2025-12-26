@@ -1,34 +1,34 @@
 import { LockOutlined, UserOutlined } from '@ant-design/icons'
-import { Button, Checkbox, Form, Input, Typography } from 'antd'
+import { Alert, Button, Checkbox, Form, Input, message, Typography } from 'antd'
+import { useEffect, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
-import { login } from './Login' // Import the login function
+import { loginUser } from '../store/actions/authActions' // Redux login action
 
 const { Title, Text } = Typography
 
 const LoginForm = () => {
     const navigate = useNavigate()
+    const dispatch = useDispatch()
+    const { loading, error, token } = useSelector((state) => state.auth)
 
-    const onFinish = async (values) => {
-        try {
-            const response = await login(values) // Call the login API
-            // console.log('Login success:', response.data)
+    const [formError, setFormError] = useState(null)
 
-            // Assuming the response contains the JWT token
-            const token = response.data.token
-
-            // Save the token to localStorage (or sessionStorage)
-            localStorage.setItem('authToken', token)
-
-            // Redirect to a protected page (e.g., dashboard)
-            navigate('/dashboard')
-        } catch (error) {
-            console.error(
-                'Login failed:',
-                error.response?.data || error.message,
-            )
-            // Show error message to the user (optional)
-            alert('Invalid credentials. Please try again.')
+    // Show error message when login fails
+    useEffect(() => {
+        if (error) {
+            setFormError(error)
+            message.error(error) // optional toast
         }
+    }, [error])
+
+    // Redirect to dashboard if login successful
+    useEffect(() => {
+        if (token) navigate('/dashboard')
+    }, [token, navigate])
+
+    const onFinish = (values) => {
+        dispatch(loginUser(values))
     }
 
     return (
@@ -83,6 +83,16 @@ const LoginForm = () => {
                         onFinish={onFinish}
                         layout="vertical"
                     >
+                        {/* Server error alert */}
+                        {formError && (
+                            <Alert
+                                message={formError}
+                                type="error"
+                                showIcon
+                                style={{ marginBottom: 16 }}
+                            />
+                        )}
+
                         <Form.Item
                             name="username"
                             label="Username"
@@ -117,7 +127,12 @@ const LoginForm = () => {
 
                         <Form.Item>
                             <Checkbox>Remember me</Checkbox>
-                            <a href="#">Forgot password?</a>
+                            <a
+                                href="#"
+                                style={{ float: 'right' }}
+                            >
+                                Forgot password?
+                            </a>
                         </Form.Item>
 
                         <Form.Item>
@@ -125,6 +140,7 @@ const LoginForm = () => {
                                 type="primary"
                                 htmlType="submit"
                                 block
+                                loading={loading}
                             >
                                 Log in
                             </Button>

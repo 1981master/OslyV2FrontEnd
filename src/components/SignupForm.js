@@ -1,56 +1,58 @@
 import { LockOutlined, MailOutlined, UserOutlined } from '@ant-design/icons'
 import { Button, Form, Input, Typography, message } from 'antd'
-import axios from 'axios'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
-import { EmailVerification } from './EmailVerification' // Adjust path
-import PopupModal from './PopupModal' // Adjust path
-import { signup } from './Signup' // Adjust path
+import { signupUser } from '../store/actions/authActions' // Redux signup action
+import { EmailVerification } from './EmailVerification'
+import PopupModal from './PopupModal'
 
 const { Title, Text } = Typography
 
 const SignUpForm = () => {
     const navigate = useNavigate()
+    const dispatch = useDispatch()
+    const { user, loading, error } = useSelector((state) => state.auth)
+
     const [showPopup, setShowPopup] = useState(false)
     const [pendingUser, setPendingUser] = useState(null)
     const [popupError, setPopupError] = useState(null)
+
+    // Show error from Redux in modal
+    useEffect(() => {
+        if (error) {
+            setPopupError(error)
+            setShowPopup(true)
+        }
+    }, [error])
 
     const onFinish = async (values) => {
         const { username, email, password } = values
         const userData = { username, email, password }
 
-        try {
-            const response = await signup(userData)
-            console.log('Signup success:', response.data)
+        // Dispatch signup action
+        await dispatch(signupUser(userData))
+
+        if (user) {
+            // use user from Redux state
             message.success('Account created successfully!')
 
             // Trigger email verification
             await EmailVerification({ email })
 
-            // Show verification modal
             setPendingUser(email)
-            setPopupError(null) // clear any old error
-            setShowPopup(true)
-        } catch (err) {
-            console.error('Signup error:', err)
-            const errorMsg =
-                err.response?.data?.message ||
-                err.response?.data ||
-                'Signup failed. Please try again.'
-            setPopupError(errorMsg) // Show backend error inside popup
+            setPopupError(null)
             setShowPopup(true)
         }
     }
 
     const handleCodeSubmit = async (code) => {
         try {
-            const response = await axios.post(
-                'http://localhost:8080/api/auth/verify-code',
-                {
-                    email: pendingUser,
-                    code,
-                },
-            )
+            await fetch('http://localhost:8080/api/auth/verify-code', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: pendingUser, code }),
+            })
             message.success('Verification successful!')
             setShowPopup(false)
             navigate('/login')
@@ -68,7 +70,6 @@ const SignUpForm = () => {
                 flexDirection: 'column',
             }}
         >
-            {/* Header */}
             <div
                 style={{
                     width: '100%',
@@ -85,7 +86,6 @@ const SignUpForm = () => {
                 </Title>
             </div>
 
-            {/* Sign Up Form */}
             <div
                 style={{
                     flex: 1,
@@ -197,6 +197,7 @@ const SignUpForm = () => {
                                 type="primary"
                                 htmlType="submit"
                                 block
+                                loading={loading}
                             >
                                 Sign Up
                             </Button>
@@ -215,7 +216,6 @@ const SignUpForm = () => {
                 </div>
             </div>
 
-            {/* Footer */}
             <div
                 style={{
                     width: '100%',
@@ -229,7 +229,6 @@ const SignUpForm = () => {
                 </Text>
             </div>
 
-            {/* Verification/Error Modal */}
             <PopupModal
                 visible={showPopup}
                 onClose={() => {
